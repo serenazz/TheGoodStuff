@@ -1,0 +1,48 @@
+shuffled README
+
+id: userid
+first: first order date
+last: last order date
+num: total payorder number
+total_cnt: total suborder num (including one payorder with multiple suborders (规格不一样))
+promotion_cnt: number of payorder with coupon
+promotion_amt: payorder amount with coupon
+first_order_interval: days since first order
+last_order_interval: days since last order
+
+
+recently_joined: first order interval <=90
+ratio: promotion_cnt/num
+if_new: first & last order in same day, including multiple orders
+plan: which plan used
+
+
+历史推过的
+
+
+#6.22下雨天
+pushed_browse6_22
+622pushed
+取消关注:8
+
+#623小龙虾
+623pushed
+
+
+#6.14推送
+pushed_browse
+df_final
+取消关注:54
+
+
+614_617all_browse
+
+
+#76 normal+single1+single2
+df_75_all
+#76 重流失推送
+df_76_all
+
+
+710推送
+df_710_all

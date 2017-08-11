@@ -1,0 +1,118 @@
+SELECT payorder.buyerid, from_unixtime(payorder.dateline,"%Y-%m-%d %H"), payorder.merchandiseid,payorder.couponmoney,payorder.promotionfee,a.content
+from payorder
+left join
+ (select merchtype.content, paysuborder.merchtypeid, paysuborder.orderid from paysuborder left join merchtype on
+ paysuborder.merchtypeid=merchtype.merchtypeid) a on a.orderid=payorder.orderid
+where payorder.merchandiseid in (491,530,580,587,591,607,603)
+and payorder.orderstatus in (2,5)
+
+
+
+===============
+
+SELECT
+    `user`.`userid`,
+    FROM_UNIXTIME(shoudanb.dateline, '%Y-%m-%d') AS 'shoudan',
+    c.last_order AS "last_order",
+    c.num_of_order,
+    d.total_cnt,
+    d.promotion_cnt,
+    coupon.coupon_cnt，
+    user.leaderid
+FROM
+    USER
+LEFT JOIN
+    shoudanb
+ON
+    `user`.`userid` = shoudanb.buyerid
+LEFT JOIN
+    (
+    SELECT
+        payorder.buyerid,
+        COUNT(*) AS coupon_cnt
+    FROM
+        payorder
+    WHERE
+        payorder.couponmoney > 0
+        and payorder.orderstatus in (2,5)
+        group by payorder.buyerid) as coupon
+    ON
+        coupon.buyerid = `user`.`userid`
+LEFT JOIN
+            (
+                SELECT
+                COUNT(*) AS num_of_order,
+                payorder.buyerid,
+                MAX(payorder.orderday) AS last_order
+                FROM
+                payorder
+                WHERE
+                payorder.orderstatus IN(2, 5)
+                GROUP BY
+                payorder.buyerid
+            ) c
+    ON
+        c.buyerid = `user`.`userid`
+LEFT JOIN
+    (
+    SELECT
+        paysuborder.userid AS id,
+        COUNT(*) AS total_cnt,
+        a.cnt AS promotion_cnt,
+        a.amt AS promotion_amt,
+        b.cnt AS regular_cnt,
+        b.amt AS regular_amt
+    FROM
+        paysuborder
+    LEFT JOIN
+        (
+        SELECT
+            k.id AS userid,
+            COUNT(*) AS cnt,
+            SUM(k.fee) / 100 AS amt
+        FROM
+            (
+            SELECT
+                SUM(paysuborder.promotionfee) AS fee,
+                paysuborder.userid AS id
+            FROM
+                paysuborder
+            WHERE
+                paysuborder.orderstatus IN(2, 5)
+            GROUP BY
+                paysuborder.orderid
+        ) k
+    WHERE
+        k.fee > 0
+    GROUP BY
+        k.id
+    ) a
+ON
+    paysuborder.userid = a.userid
+LEFT JOIN
+    (
+    SELECT
+        paysuborder.userid AS id,
+        COUNT(*) AS cnt,
+        SUM(paysuborder.price) / 100 AS amt
+    FROM
+        paysuborder
+    WHERE
+        paysuborder.promotionfee = 0
+    GROUP BY
+        paysuborder.userid
+) b
+ON
+    paysuborder.userid = b.id
+where paysuborder.orderstatus in (2,5)
+GROUP BY
+    paysuborder.userid
+ORDER BY
+    a.cnt
+DESC
+) d
+ON
+    d.id = USER.userid
+WHERE
+    c.last_order IS NOT NULL AND FROM_UNIXTIME(shoudanb.dateline, '%Y-%m-%d') IS NOT NULL
+    and user.userid in ()
